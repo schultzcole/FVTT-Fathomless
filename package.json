@@ -1,0 +1,16 @@
+{
+  "name": "fvtt-fathomless",
+  "version": "0.0.0",
+  "description": "Allow active effect changes to depend on actor data, even actor data that is modified by other active effects",
+  "main": "node-scripts/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/schultzcole/FVTT-Fathomless.git"
+  },
+  "author": "",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/schultzcole/FVTT-Fathomless/issues"
+  },
+  "homepage": "https://github.com/schultzcole/FVTT-Fathomless#readme"
+}
