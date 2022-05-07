@@ -16,7 +16,7 @@
   "dependencies": [ ],
   "conflicts": [ ],
   "esmodules": [
-    "scripts/main.mjs"
+    "scripts/foundry-entry.mjs"
   ],
   "url": "This is auto replaced",
   "manifest": "This is auto replaced",
