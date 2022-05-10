@@ -27,13 +27,13 @@ export function fathomless_applyActiveEffects(actor) {
             // first character is enough to eliminate the vast majority of cases and is extremely fast.
             // If it passes that first test, then we do a full check to see if it is a valid key.
             const char1 = change.value.charAt(0);
-            const firstCharIsAlpha = (char1 >= 'a' && char1 <= 'z') || (char1 >= 'A' && char1 <= 'Z');
+            const firstCharIsAlpha = (char1 >= "a" && char1 <= "z") || (char1 >= "A" && char1 <= "Z");
             if ( firstCharIsAlpha && foundry.utils.getProperty(actor, change.value) !== undefined ) {
                 const existingDeps = changeDependencies.get(change.key);
                 if ( existingDeps !== undefined ) {
                     existingDeps.add(change.value);
                 } else {
-                    const newDeps = new Set([change.value]);
+                    const newDeps = new Set([ change.value ]);
                     changeDependencies.set(change.key, newDeps);
                 }
             }

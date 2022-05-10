@@ -1,1 +1,1 @@
-export const MODULE_ID = "fathomless"
+export const MODULE_ID = "fathomless";
