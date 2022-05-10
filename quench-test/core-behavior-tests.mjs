@@ -1,7 +1,7 @@
 const ActorClass = CONFIG.Actor.documentClass;
 const ActiveEffectClass = CONFIG.ActiveEffect.documentClass;
 
-export function coreBehaviorTests(context, func) {
+export function coreBehaviorTests(context, batchConfig) {
     const { describe, it, before, after, assert } = context;
 
     function _defineActiveEffectChangeTest(changes, expected, { actorData = {}, debug = false } = {}) {
@@ -25,9 +25,9 @@ export function coreBehaviorTests(context, func) {
         let oldApplyActiveEffects = null;
 
         before(() => {
-            console.log("Overwriting Actor.prototype.applyActiveEffects with", func);
+            console.log("Overwriting Actor.prototype.applyActiveEffects with", batchConfig.func);
             oldApplyActiveEffects = Actor.prototype.applyActiveEffects;
-            Actor.prototype.applyActiveEffects = func;
+            Actor.prototype.applyActiveEffects = batchConfig.func;
         });
 
         after(() => {

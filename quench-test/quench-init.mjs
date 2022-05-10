@@ -19,7 +19,7 @@ Hooks.once("quenchReady", (quench) => {
     for ( const batchConfig of batchConfigs ) {
         quench.registerBatch(
             `fathomless.parity.${batchConfig.id}-impl`,
-            (context) => coreBehaviorTests(context, batchConfig.func),
+            (context) => coreBehaviorTests(context, batchConfig),
             {
                 displayName: `FATHOMLESS: Core Parity (${batchConfig.id.titleCase()} Implementaiton)`,
             },
