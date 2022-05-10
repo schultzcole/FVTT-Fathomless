@@ -38,7 +38,8 @@ export function coreBehaviorTests(context, batchConfig) {
             it("should add to existing value",
                 _defineActiveEffectChangeTest(
                     [ { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "1" } ],
-                    [ { key: "data.currency.pp", value: 1 } ],
+                    [ { key: "data.currency.pp", value: 42 } ],
+                    { actorData: { "data.currency.pp": 41 } },
                 ),
             );
 
