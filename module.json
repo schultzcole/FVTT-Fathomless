@@ -16,7 +16,8 @@
   "dependencies": [ ],
   "conflicts": [ ],
   "esmodules": [
-    "scripts/foundry-entry.mjs"
+    "scripts/foundry-entry.mjs",
+    "quench-test/quench-init.mjs"
   ],
   "url": "This is auto replaced",
   "manifest": "This is auto replaced",
