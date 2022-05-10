@@ -1,25 +1,7 @@
-const ActorClass = CONFIG.Actor.documentClass;
-const ActiveEffectClass = CONFIG.ActiveEffect.documentClass;
+import { defineActiveEffectChangeTest } from "./test-helpers.mjs";
 
 export function coreBehaviorTests(context, batchConfig) {
-    const { describe, it, before, after, assert } = context;
-
-    function _defineActiveEffectChangeTest(changes, expected, { actorData = {}, debug = false } = {}) {
-        return () => {
-            if ( debug ) debugger;
-            const actor = new ActorClass(foundry.utils.mergeObject({
-                name: "Test Actor",
-                type: "character",
-            }, actorData));
-            const effect = new ActiveEffectClass({ changes });
-
-            actor.effects.set(effect.id, effect, { modifySource: false });
-            actor.applyActiveEffects();
-
-            const actual = expected.map((exp) => foundry.utils.getProperty(actor, "data." + exp.key));
-            assert.deepEqual(actual, expected.map((exp) => exp.value));
-        };
-    }
+    const { describe, it, before, after } = context;
 
     describe("Core Parity", () => {
         let oldApplyActiveEffects = null;
@@ -36,7 +18,7 @@ export function coreBehaviorTests(context, batchConfig) {
 
         describe("ADD Change Mode", () => {
             it("should add to existing value",
-                _defineActiveEffectChangeTest(
+                defineActiveEffectChangeTest(
                     [ { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "1" } ],
                     [ { key: "data.currency.pp", value: 42 } ],
                     { actorData: { "data.currency.pp": 41 } },
@@ -44,7 +26,7 @@ export function coreBehaviorTests(context, batchConfig) {
             );
 
             it("should subtract from existing value when value is negative",
-                _defineActiveEffectChangeTest(
+                defineActiveEffectChangeTest(
                     [ { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "-1" } ],
                     [ { key: "data.currency.pp", value: 42 } ],
                     { actorData: { "data.currency.pp": 43 } },
@@ -54,7 +36,7 @@ export function coreBehaviorTests(context, batchConfig) {
 
         describe("MULTIPLY Change Mode", () => {
             it("should add to existing value",
-                _defineActiveEffectChangeTest(
+                defineActiveEffectChangeTest(
                     [ { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY, value: "2" } ],
                     [ { key: "data.currency.pp", value: 20 } ],
                     { actorData: { "data.currency.pp": 10 } },
@@ -64,7 +46,7 @@ export function coreBehaviorTests(context, batchConfig) {
 
         describe("OVERRIDE Change Mode", () => {
             it("should override existing value",
-                _defineActiveEffectChangeTest(
+                defineActiveEffectChangeTest(
                     [ { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "1" } ],
                     [ { key: "data.currency.pp", value: 1 } ],
                 ),
@@ -73,7 +55,7 @@ export function coreBehaviorTests(context, batchConfig) {
 
         describe("UPGRADE Change Mode", () => {
             it("should upgrade lower existing value",
-                _defineActiveEffectChangeTest(
+                defineActiveEffectChangeTest(
                     [ { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.UPGRADE, value: "15" } ],
                     [ { key: "data.currency.pp", value: 15 } ],
                     { actorData: { "data.currency.pp": 10 } },
@@ -81,7 +63,7 @@ export function coreBehaviorTests(context, batchConfig) {
             );
 
             it("should not upgrade higher existing value",
-                _defineActiveEffectChangeTest(
+                defineActiveEffectChangeTest(
                     [ { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.UPGRADE, value: "15" } ],
                     [ { key: "data.currency.pp", value: 20 } ],
                     { actorData: { "data.currency.pp": 20 } },
@@ -91,7 +73,7 @@ export function coreBehaviorTests(context, batchConfig) {
 
         describe("DOWNGRADE Change Mode", () => {
             it("should downgrade higher existing value",
-                _defineActiveEffectChangeTest(
+                defineActiveEffectChangeTest(
                     [ { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.DOWNGRADE, value: "15" } ],
                     [ { key: "data.currency.pp", value: 15 } ],
                     { actorData: { "data.currency.pp": 20 } },
@@ -99,7 +81,7 @@ export function coreBehaviorTests(context, batchConfig) {
             );
 
             it("should not downgrade lower existing value",
-                _defineActiveEffectChangeTest(
+                defineActiveEffectChangeTest(
                     [ { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.DOWNGRADE, value: "15" } ],
                     [ { key: "data.currency.pp", value: 10 } ],
                     { actorData: { "data.currency.pp": 10 } },
@@ -109,7 +91,7 @@ export function coreBehaviorTests(context, batchConfig) {
 
         describe("Multiple changes, different keys", () => {
             it("should apply changes to the appropriate keys ",
-                _defineActiveEffectChangeTest(
+                defineActiveEffectChangeTest(
                     [
                         { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "7" },
                         { key: "data.currency.gp", mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE, value: "13" },
@@ -125,7 +107,7 @@ export function coreBehaviorTests(context, batchConfig) {
 
         describe("Multiple changes, same key", () => {
             it("should apply multiple ADD changes",
-                _defineActiveEffectChangeTest(
+                defineActiveEffectChangeTest(
                     [
                         { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "2" },
                         { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "3" },
@@ -135,7 +117,7 @@ export function coreBehaviorTests(context, batchConfig) {
             );
 
             it("should apply ADD and MULTIPLY changes in order of implicit priority",
-                _defineActiveEffectChangeTest(
+                defineActiveEffectChangeTest(
                     [
                         { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "3" },
                         { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY, value: "5" },
@@ -146,7 +128,7 @@ export function coreBehaviorTests(context, batchConfig) {
             );
 
             it("should apply OVERRIDE and ADD changes in order of given priority",
-                _defineActiveEffectChangeTest(
+                defineActiveEffectChangeTest(
                     [
                         { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE, value: "40", priority: 0 },
                         { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "2", priority: 1 },
