@@ -4,8 +4,8 @@ import { fathomless_applyActiveEffects } from "../scripts/implementation.mjs";
 export function dependentBehaviorTests(context) {
     const { describe, it, before, after } = context;
 
-    setupApplyActiveEffectsMethodOverride(before, after, function applyActiveEffects_testHarness() {
-        fathomless_applyActiveEffects(this);
+    setupApplyActiveEffectsMethodOverride(before, after, function applyActiveEffects_testHarness(_) {
+        return fathomless_applyActiveEffects(this);
     });
 
     describe("Single Layer Dependency", () => {

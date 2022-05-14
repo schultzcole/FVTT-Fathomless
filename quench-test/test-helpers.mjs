@@ -17,13 +17,13 @@ export function defineActiveEffectChangeTest(changes, expected, { actorData = {}
     };
 }
 
-export function setupApplyActiveEffectsMethodOverride(before, after, func) {
+export function setupApplyActiveEffectsMethodOverride(before, after, impl) {
     let oldApplyActiveEffects = null;
 
     before(() => {
-        console.log("Overwriting Actor.prototype.applyActiveEffects with", func);
+        console.log("Overwriting Actor.prototype.applyActiveEffects with", impl);
         oldApplyActiveEffects = Actor.prototype.applyActiveEffects;
-        Actor.prototype.applyActiveEffects = func;
+        Actor.prototype.applyActiveEffects = function() { impl.call(this, oldApplyActiveEffects) };
     });
 
     after(() => {

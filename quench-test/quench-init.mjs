@@ -1,31 +1,9 @@
-import { MODULE_ID } from "../scripts/constants.mjs";
-import { fathomless_applyActiveEffects } from "../scripts/implementation.mjs";
 import { coreBehaviorTests } from "./core-behavior-tests.mjs";
 import { dependentBehaviorTests } from "./dependent-behavior-tests.mjs";
-
-const batchConfigs = [
-    {
-        id: "core",
-        func: Actor.prototype.applyActiveEffects,
-    },
-    {
-        id: MODULE_ID,
-        func: function applyActiveEffects_testHarness() {
-            fathomless_applyActiveEffects(this);
-        },
-    },
-];
+import { performanceTests } from "./performance-tests.mjs";
 
 Hooks.once("quenchReady", (quench) => {
-    for ( const batchConfig of batchConfigs ) {
-        quench.registerBatch(
-            `fathomless.parity.${batchConfig.id}-impl`,
-            (context) => coreBehaviorTests(context, batchConfig),
-            {
-                displayName: `FATHOMLESS: Core Parity (${batchConfig.id.titleCase()} Implementaiton)`,
-            },
-        );
-    }
-
+    quench.registerBatch(`fathomless.parity`, coreBehaviorTests, { displayName: `FATHOMLESS: Core Parity` });
     quench.registerBatch("fathomless.dependent-changes", dependentBehaviorTests, { displayName: "FATHOMLESS: Dependent Changes" });
+    quench.registerBatch("fathomless.performance-tests", performanceTests, { displayName: "FATHOMLESS: Performance Tests" });
 });
