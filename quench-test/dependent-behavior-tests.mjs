@@ -11,7 +11,7 @@ export function dependentBehaviorTests(context) {
     describe("Single Layer Dependency", () => {
         it("ADD adds property value to target",
             defineActiveEffectChangeTest(
-                [ { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" } ],
+                [ { key: "data.currency.pp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" } ],
                 [ { key: "data.currency.pp", value: 54 } ],
                 { actorData: { "data.currency.pp": 15, "data.currency.gp": 39 } },
             ),
@@ -22,8 +22,8 @@ export function dependentBehaviorTests(context) {
         it("ADD adds property value to target after property is updated",
             defineActiveEffectChangeTest(
                 [
-                    { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" },
-                    { key: "data.currency.gp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "7" },
+                    { key: "data.currency.pp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" },
+                    { key: "data.currency.gp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "7" },
                 ],
                 [ { key: "data.currency.pp", value: 61 } ],
                 { actorData: { "data.currency.pp": 15, "data.currency.gp": 39 } },
@@ -35,11 +35,11 @@ export function dependentBehaviorTests(context) {
                 [
                     {
                         key: "data.currency.pp",
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: globalThis.CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
                         value: "&data.currency.gp",
                         priority: 0,
                     },
-                    { key: "data.currency.gp", mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE, value: "42", priority: 1 },
+                    { key: "data.currency.gp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.OVERRIDE, value: "42", priority: 1 },
                 ],
                 [ { key: "data.currency.pp", value: 42 } ],
             ),
@@ -50,27 +50,27 @@ export function dependentBehaviorTests(context) {
                 [
                     {
                         key: "data.currency.gp",
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: globalThis.CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
                         value: "&data.currency.cp",
                         priority: 0,
                     },
-                    { key: "data.currency.gp", mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY, value: "2" },
+                    { key: "data.currency.gp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.MULTIPLY, value: "2" },
                     {
                         key: "data.currency.ep",
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: globalThis.CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
                         value: "&data.currency.cp",
                         priority: 0,
                     },
-                    { key: "data.currency.ep", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "13" },
-                    { key: "data.currency.ep", mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY, value: "&data.currency.sp" },
+                    { key: "data.currency.ep", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "13" },
+                    { key: "data.currency.ep", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.MULTIPLY, value: "&data.currency.sp" },
                     {
                         key: "data.currency.pp",
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: globalThis.CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
                         value: "&data.currency.sp",
                         priority: 0,
                     },
-                    { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.ep" },
-                    { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" },
+                    { key: "data.currency.pp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.ep" },
+                    { key: "data.currency.pp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" },
                 ],
                 [ { key: "data.currency.pp", value: 67 }, {
                     key: "data.currency.ep",
@@ -85,7 +85,7 @@ export function dependentBehaviorTests(context) {
         it("Change is ignored when it depends on its own target",
             defineActiveEffectChangeTest(
                 [
-                    { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.pp" },
+                    { key: "data.currency.pp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.pp" },
                 ],
                 [ { key: "data.currency.pp", value: 4 } ],
                 { actorData: { "data.currency.pp": 4 } },
@@ -95,8 +95,8 @@ export function dependentBehaviorTests(context) {
         it("Changes belonging to a length 2 cycle are not applied",
             defineActiveEffectChangeTest(
                 [
-                    { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" },
-                    { key: "data.currency.gp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.pp" },
+                    { key: "data.currency.pp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" },
+                    { key: "data.currency.gp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.pp" },
                 ],
                 [ { key: "data.currency.pp", value: 3 }, { key: "data.currency.gp", value: 9 } ],
                 { actorData: { "data.currency.pp": 3, "data.currency.gp": 9 } },
@@ -107,11 +107,11 @@ export function dependentBehaviorTests(context) {
         it("Changes belonging to a length 5 cycle are not applied",
             defineActiveEffectChangeTest(
                 [
-                    { key: "flags.custom.a", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.b" },
-                    { key: "flags.custom.b", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.c" },
-                    { key: "flags.custom.c", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.d" },
-                    { key: "flags.custom.d", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.e" },
-                    { key: "flags.custom.e", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.a" },
+                    { key: "flags.custom.a", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.b" },
+                    { key: "flags.custom.b", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.c" },
+                    { key: "flags.custom.c", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.d" },
+                    { key: "flags.custom.d", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.e" },
+                    { key: "flags.custom.e", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.a" },
                 ],
                 [
                     { key: "flags.custom.a", value: "A" },
@@ -135,9 +135,9 @@ export function dependentBehaviorTests(context) {
         it("Changes that depend on a properties that belong to a cycle are not applied",
             defineActiveEffectChangeTest(
                 [
-                    { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" },
-                    { key: "data.currency.gp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.pp" },
-                    { key: "data.currency.ep", mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE, value: "&data.currency.pp" },
+                    { key: "data.currency.pp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" },
+                    { key: "data.currency.gp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.pp" },
+                    { key: "data.currency.ep", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.OVERRIDE, value: "&data.currency.pp" },
                 ],
                 [ { key: "data.currency.ep", value: 5 } ],
                 { actorData: { "data.currency.pp": 3, "data.currency.gp": 9, "data.currency.ep": 5 } },
@@ -147,9 +147,9 @@ export function dependentBehaviorTests(context) {
         it("Changes that don't depend on properties that belong to a cycle are applied",
             defineActiveEffectChangeTest(
                 [
-                    { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" },
-                    { key: "data.currency.gp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.pp" },
-                    { key: "data.currency.cp", mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE, value: "&data.currency.ep" },
+                    { key: "data.currency.pp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" },
+                    { key: "data.currency.gp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.pp" },
+                    { key: "data.currency.cp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.OVERRIDE, value: "&data.currency.ep" },
                 ],
                 [ { key: "data.currency.cp", value: 10 } ],
                 {
@@ -166,9 +166,9 @@ export function dependentBehaviorTests(context) {
         it("Changes that target a property within a cycle are not applied",
             defineActiveEffectChangeTest(
                 [
-                    { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.ep" },
-                    { key: "data.currency.pp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" },
-                    { key: "data.currency.gp", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.pp" },
+                    { key: "data.currency.pp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.ep" },
+                    { key: "data.currency.pp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.gp" },
+                    { key: "data.currency.gp", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&data.currency.pp" },
                 ],
                 [ { key: "data.currency.pp", value: 3 } ],
                 { actorData: { "data.currency.pp": 3, "data.currency.gp": 9, "data.currency.ep": 10 } },
@@ -178,11 +178,11 @@ export function dependentBehaviorTests(context) {
         it("Changes in a cycle that is connected to a larger graph are not applied, but changes to 'upstream' nodes are",
             defineActiveEffectChangeTest(
                 [
-                    { key: "flags.custom.b", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.a" },
-                    { key: "flags.custom.c", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.b" },
-                    { key: "flags.custom.d", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.c" },
-                    { key: "flags.custom.e", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.d" },
-                    { key: "flags.custom.c", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.e" },
+                    { key: "flags.custom.b", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.a" },
+                    { key: "flags.custom.c", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.b" },
+                    { key: "flags.custom.d", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.c" },
+                    { key: "flags.custom.e", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.d" },
+                    { key: "flags.custom.c", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.e" },
                 ],
                 [
                     { key: "flags.custom.b", value: "BA" },
@@ -205,11 +205,11 @@ export function dependentBehaviorTests(context) {
         it("Changes to nodes 'downstream' of a cycle are not applied",
             defineActiveEffectChangeTest(
                 [
-                    { key: "flags.custom.a", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.b" },
-                    { key: "flags.custom.b", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.c" },
-                    { key: "flags.custom.c", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.a" },
-                    { key: "flags.custom.d", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.c" },
-                    { key: "flags.custom.e", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.d" },
+                    { key: "flags.custom.a", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.b" },
+                    { key: "flags.custom.b", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.c" },
+                    { key: "flags.custom.c", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.a" },
+                    { key: "flags.custom.d", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.c" },
+                    { key: "flags.custom.e", mode: globalThis.CONST.ACTIVE_EFFECT_MODES.ADD, value: "&flags.custom.d" },
                 ],
                 [
                     { key: "flags.custom.a", value: "A" },
