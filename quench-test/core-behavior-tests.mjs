@@ -1,20 +1,10 @@
-import { defineActiveEffectChangeTest } from "./test-helpers.mjs";
+import { defineActiveEffectChangeTest, setupApplyActiveEffectsMethodOverride } from "./test-helpers.mjs";
 
 export function coreBehaviorTests(context, batchConfig) {
     const { describe, it, before, after } = context;
 
     describe("Core Parity", () => {
-        let oldApplyActiveEffects = null;
-
-        before(() => {
-            console.log("Overwriting Actor.prototype.applyActiveEffects with", batchConfig.func);
-            oldApplyActiveEffects = Actor.prototype.applyActiveEffects;
-            Actor.prototype.applyActiveEffects = batchConfig.func;
-        });
-
-        after(() => {
-            Actor.prototype.applyActiveEffects = oldApplyActiveEffects;
-        });
+        setupApplyActiveEffectsMethodOverride(before, after, batchConfig.func);
 
         describe("ADD Change Mode", () => {
             it("should add to existing value",
@@ -135,6 +125,31 @@ export function coreBehaviorTests(context, batchConfig) {
                     ],
                     [ { key: "data.currency.pp", value: 42 } ],
                     { actorData: { "data.currency.pp": 100 } },
+                ),
+            );
+        });
+
+        describe("Weird Cases", () => {
+            it("should create the target effect path if it does not already exist",
+                defineActiveEffectChangeTest(
+                    [
+                        { key: "flags.myCustomKey1", mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE, value: "Hello, world!" },
+                        { key: "flags.myCustomKey2", mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE, value: "Something else" },
+                    ],
+                    [
+                        { key: "flags.myCustomKey1", value: "Hello, world!" },
+                        { key: "flags.myCustomKey2", value: "Something else" },
+                    ],
+                ),
+            );
+
+            it("should add to target effect path even if the target key is not defined in the schema",
+                defineActiveEffectChangeTest(
+                    [
+                        { key: "flags.myCustomKey", mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: ", world!" },
+                    ],
+                    [ { key: "flags.myCustomKey", value: "Hello, world!" } ],
+                    { actorData: { "flags.myCustomKey": "Hello" } },
                 ),
             );
         });

@@ -13,7 +13,21 @@ export function defineActiveEffectChangeTest(changes, expected, { actorData = {}
         actor.effects.set(effect.id, effect, { modifySource: false });
         actor.applyActiveEffects();
 
-        const actual = expected.map((exp) => foundry.utils.getProperty(actor, "data." + exp.key));
-        globalThis.chai.assert.deepEqual(actual, expected.map((exp) => exp.value));
+        const actual = expected.map((exp) => ({ key: exp.key, value: foundry.utils.getProperty(actor.data, exp.key) }));
+        globalThis.chai.assert.deepEqual(actual, expected);
     };
+}
+
+export function setupApplyActiveEffectsMethodOverride(before, after, func) {
+    let oldApplyActiveEffects = null;
+
+    before(() => {
+        console.log("Overwriting Actor.prototype.applyActiveEffects with", func);
+        oldApplyActiveEffects = Actor.prototype.applyActiveEffects;
+        Actor.prototype.applyActiveEffects = func;
+    });
+
+    after(() => {
+        Actor.prototype.applyActiveEffects = oldApplyActiveEffects;
+    });
 }

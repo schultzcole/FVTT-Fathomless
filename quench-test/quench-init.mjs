@@ -1,6 +1,7 @@
 import { MODULE_ID } from "../scripts/constants.mjs";
 import { fathomless_applyActiveEffects } from "../scripts/implementation.mjs";
 import { coreBehaviorTests } from "./core-behavior-tests.mjs";
+import { dependentBehaviorTests } from "./dependent-behavior-tests.mjs";
 
 const batchConfigs = [
     {
@@ -25,4 +26,6 @@ Hooks.once("quenchReady", (quench) => {
             },
         );
     }
+
+    quench.registerBatch("fathomless.dependent-changes", dependentBehaviorTests, { displayName: "FATHOMLESS: Dependent Changes" });
 });

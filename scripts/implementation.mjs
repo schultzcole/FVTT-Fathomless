@@ -1,19 +1,25 @@
 /**
- * Applies ActiveEffect changes to the given actor, including changes that depend on other properties of the given actor,
- * even those that are affected by other ActiveEffect changes, so long as the dependency tree does not contain any cycles.
+ * Applies ActiveEffect changes to the given actor, including changes that depend on other properties of the given
+ * actor, even those that are affected by other ActiveEffect changes, so long as the dependency graph does not contain
+ * any cycles.
+ * The current behavior is that if a cycle is detected, no active effect changes will be applied.
  *
  * This both applies the modifications and updates `actor.overrides`.
  * @param actor {Actor | BaseActor}
  */
 export function fathomless_applyActiveEffects(actor) {
-    /** Maps each property to the properties on which it depends
-     * this is the actual DAG data structure
-     * @type Map<String,Set<String>>
-     */
-    const changeDependencies = new Map();
+    actor.overrides = {};
+    if ( actor.effects.size === 0 ) return;
 
-    // Stores the final list of changes to be applied
-    const allChanges = [];
+    // This implementation uses Kahn's Algorithm for topologically sorting a directed acyclic graph
+
+    /**
+     * Each actor data property targeted by an active effect change is a node in the dependency graph
+     * Each node in the map is keyed by actor data path and contains references to the changes on which it depends
+     * as well as the nodes that depend on it.
+     * @type {Map<string,{key: string, inDegree: number, changes: EffectChangeData[], children: string[]}>}
+     */
+    const nodes = new Map();
 
     // Build the DAG
     for ( const effect of actor.effects.values() ) {
@@ -21,62 +27,100 @@ export function fathomless_applyActiveEffects(actor) {
 
         const changes = effect.data.changes;
         for ( let ci = 0; ci < changes.length; ci++ ) {
-            const change = changes[ci];
+            const change = {
+                ...changes[ci],
+                effect: effect,
+            };
+
+            change.dependsOnProperty = change.value.charAt(0) === "&";
+            if ( change.dependsOnProperty ) change.value = change.value.slice(1);
+
             if ( change.key === change.value ) {
                 console.warn(`Change ${ci} on ActiveEffect ${effect.id} is not valid because it references itself.`);
                 continue;
             }
-            change._priority = change.priority ?? change.mode * 10;
-            allChanges.push(change);
+            change.priority ??= change.mode * 10;
 
-            if ( isObjectKey(actor, change.value) ) {
-                const existingDeps = changeDependencies.get(change.key);
-                if ( existingDeps !== undefined ) {
-                    existingDeps.add(change.value);
+            let targetNode = nodes.get(change.key);
+            if ( targetNode !== undefined ) {
+                targetNode.inDegree += change.dependsOnProperty ? 1 : 0;
+                targetNode.changes.push(change);
+            } else {
+                targetNode = {
+                    key: change.key,
+                    inDegree: change.dependsOnProperty ? 1 : 0,
+                    changes: [ change ],
+                    children: [],
+                };
+                nodes.set(change.key, targetNode);
+            }
+
+            if ( change.dependsOnProperty ) {
+                let parentNode = nodes.get(change.value);
+                if ( parentNode !== undefined ) {
+                    parentNode.children.push(change.key);
                 } else {
-                    const newDeps = new Set([ change.value ]);
-                    changeDependencies.set(change.key, newDeps);
+                    parentNode = {
+                        key: change.value,
+                        inDegree: 0,
+                        changes: [],
+                        children: [ change.key ],
+                    };
+                    nodes.set(change.value, parentNode);
                 }
             }
         }
     }
 
-    // Use the DAG to determine sort order. Changes that depend on other changes will be sorted later
-    allChanges.sort((a, b) => {
-        if ( changeDependencies.get(a.key)?.has(b.key) ) {
-            return 1;
-        } else if ( changeDependencies.get(b.key)?.has(a.key) ) {
-            return -1;
-        } else {
-            return a._priority - b._priority;
-        }
-    });
+    if ( nodes.size === 0 ) return;
 
-    // Apply Effects
-    actor.overrides = {};
-    for ( const change of allChanges ) {
-        const result = change.document.apply(actor, change);
-        delete change._priority;
-        if ( result ) {
-            foundry.utils.setProperty(actor.overrides, change.key, result)
+    // Build queue of nodes that depend on no other nodes (inDegree is 0)
+    let queueStart = 0;
+    let queueEnd = 0;
+    const queue = new Array(nodes.size);
+    for ( const node of nodes.values() ) {
+        if ( node.inDegree !== 0 ) continue;
+        queue[queueEnd] = node;
+        queueEnd++;
+    }
+
+    // Pull nodes off the queue, adding them to the ordered list,
+    // and adding their dependent nodes to the queue if they have no other parent nodes.
+    // Nodes in a cycle always have at least one parent, thus they are not enqueued, and thus effects targeting them
+    // or dependent upon them are not applied
+    let orderedNodesLen = 0;
+    const orderedNodes = new Array(nodes.size);
+    while ( queueStart < queueEnd ) {
+        let node = queue[queueStart];
+        queueStart++;
+        orderedNodes[orderedNodesLen] = node;
+        orderedNodesLen++;
+        for ( const childKey of node.children ) {
+            const childNode = nodes.get(childKey);
+            if ( childNode === undefined ) continue;
+            childNode.inDegree--;
+
+            if ( childNode.inDegree === 0 ) {
+                queue[queueEnd] = childNode;
+                queueEnd++;
+            }
         }
     }
-}
 
-/**
- * Returns whether the given string is a data key in the given object.
- * This function assumes that data keys always begin with an alphabetic character.
- * @param object {object}
- * @param key {string}
- * @return {boolean}
- */
-function isObjectKey(object, key) {
-    // In the majority of cases, we can eliminate a change value from being a valid property key
-    // based on whether it is alphabetical. We don't need to test the full string; just testing the
-    // first character is enough to eliminate the vast majority of cases and is pretty fast.
-    // If it passes that first test, then we do a full check to see if it is a valid key.
-    const char1 = key.charAt(0);
-    const firstCharIsAlpha = (char1 >= "a" && char1 <= "z") || (char1 >= "A" && char1 <= "Z");
-
-    return firstCharIsAlpha && foundry.utils.getProperty(object, key) !== undefined;
+    // Apply changes in topologically sorted order
+    for ( let i = 0; i < orderedNodesLen; i++ ) {
+        const node = orderedNodes[i];
+        if ( node.changes.length > 1 ) {
+            node.changes.sort((a, b) => a.priority - b.priority);
+        }
+        for ( const change of node.changes ) {
+            if ( change.dependsOnProperty ) {
+                change.value = foundry.utils.getProperty(actor.data, change.value);
+            }
+            const result = change.effect.apply(actor, change);
+            if ( result ) {
+                foundry.utils.setProperty(actor.overrides, change.key, result);
+            }
+        }
+    }
 }
