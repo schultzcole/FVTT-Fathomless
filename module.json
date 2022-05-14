@@ -2,7 +2,7 @@
   "name": "fathomless",
   "title": "Fathomless",
   "description": "Allow active effect changes to depend on actor data, even actor data that is modified by other active effects",
-  "version": "This is auto replaced",
+  "version": "0.0.0",
   "library": "false",
   "minimumCoreVersion": "9",
   "compatibleCoreVersion": "9",
