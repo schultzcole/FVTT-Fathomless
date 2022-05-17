@@ -80,6 +80,6 @@ Note: When Quench is enabled, the Fathomless implementation of `applyActiveEffec
 
 ## License
 
-Licensed under GPLv2. See [LICENSE](LICENSE).
+Licensed under GPLv3. See [LICENSE](LICENSE).
 
 Feel free to depend on this module or use this module's code for whatever you wish, so long as you abide by the terms of the license above.
