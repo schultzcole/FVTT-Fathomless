@@ -4,14 +4,14 @@ Fathomless is a FoundryVTT module that allow active effect changes to depend on 
 
 ## Installation
 
-Install via manifest. Download from the [Releases page](https://www.github.com/schultzcole/FVTT-Fathomless/releases).
+Install via manifest, link on the [Releases page](https://www.github.com/schultzcole/FVTT-Fathomless/releases).
 
 ## Functionality
 
 Fathomless allows active effect changes to depend on other actor data, even actor data that is modified by other active effects.
 This is accomplished by constructing a [directed graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) that encapsulates the dependency relationships between actor properties, then using that graph to perform a [Topological Sort](https://en.wikipedia.org/wiki/Topological_sorting) in order to apply the effect changes in the correct order so that all dependencies are taken into account.
 
-The nature of this implementation is such that any changes that depend on an actor property that is directly involved in a dependency cycle are ignored.
+The nature of this implementation is such that any changes "downstream" of an actor property that is involved in a dependency cycle are ignored.
 
 Referencing an actor property in an effect change is done with the syntax `&my.actor.property.path`.
 Note the use of `&` rather than `@`, which is deliberate (see the related caveat below).
@@ -28,7 +28,7 @@ The test cases are as follows:
 
  - "constants targeting same key": there are `N` effect changes, all targeting the same property with `ADD` `"1"`.
  - "constants targeting different keys": there are `N` effect changes, each of which targets a separate property with `ADD` `"1"`.
- - "properties targeting different keys": there are `N` effect changes, each of which depends on change `n+1`.
+ - "properties targeting different keys": there are `N` effect changes, each of which depends on change `n+1` (this case of course has no visible effect with the core implementation, though it does run).
 
 The durations listed here are the mean of 5 test runs per test case per implementation per value of N.
 
