@@ -35,7 +35,7 @@ export function fathomless_applyActiveEffects(actor) {
             change.dependsOnProperty = change.value.charAt(0) === "&";
             if ( change.dependsOnProperty ) change.value = change.value.slice(1);
 
-            if ( change.key === change.value ) {
+            if ( change.key?.length > 0 && change.key === change.value ) {
                 console.warn(`Change ${ci} on ActiveEffect ${effect.id} is not valid because it references itself.`);
                 continue;
             }
@@ -110,6 +110,7 @@ export function fathomless_applyActiveEffects(actor) {
     // Apply changes in topologically sorted order
     for ( let i = 0; i < orderedNodesLen; i++ ) {
         const node = orderedNodes[i];
+        nodes.delete(node.key);
         if ( node.changes.length > 1 ) {
             node.changes.sort((a, b) => a.priority - b.priority);
         }
@@ -122,5 +123,11 @@ export function fathomless_applyActiveEffects(actor) {
                 foundry.utils.setProperty(actor.overrides, change.key, result);
             }
         }
+    }
+
+    // Warn the user about any changes that were not applied due to the presence of a cycle
+    if ( nodes.size > 0 ) {
+        ui.notifications.warn(`Could not apply active effects changes to ${nodes.size} properties on Actor ${actor.name} (${actor.id}), likely due to a cycle. Check the console for more details`);
+        console.warn(`The following active effects changes on actor ${actor.id} were could not be applied, likely due to a cycle:`, Array.from(nodes.values()).flatMap(n => n.changes));
     }
 }
