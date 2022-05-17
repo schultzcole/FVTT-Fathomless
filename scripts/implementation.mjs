@@ -127,7 +127,7 @@ export function fathomless_applyActiveEffects(actor) {
 
     // Warn the user about any changes that were not applied due to the presence of a cycle
     if ( nodes.size > 0 ) {
-        ui.notifications.warn(`Could not apply active effects changes to ${nodes.size} properties on Actor ${actor.name} (${actor.id}), likely due to a cycle. Check the console for more details`);
+        ui.notifications?.warn(`Could not apply active effects changes to ${nodes.size} properties on Actor ${actor.name} (${actor.id}), likely due to a cycle. Check the console for more details`);
         console.warn(`The following active effects changes on actor ${actor.id} were could not be applied, likely due to a cycle:`, Array.from(nodes.values()).flatMap(n => n.changes));
     }
 }
